@@ -14,13 +14,21 @@ export async function readCollection<T>(collectionName: CollectionName): Promise
 export async function writeCollection<T>(collectionName: CollectionName, documents: T[]): Promise<void> {
   const filePath = getCollectionFilePath(collectionName);
   const tempPath = `${filePath}.tmp`;
-  const nextWrite = (writeQueues.get(collectionName) ?? Promise.resolve()).then(async () => {
+  const previousWrite = writeQueues.get(collectionName) ?? Promise.resolve();
+  const nextWrite = previousWrite.catch(() => undefined).then(async () => {
     await writeFile(tempPath, JSON.stringify(documents, null, 2) + '\n', 'utf8');
     await rename(tempPath, filePath);
   });
 
-  writeQueues.set(collectionName, nextWrite.catch(() => undefined));
-  await nextWrite;
+  writeQueues.set(collectionName, nextWrite);
+
+  try {
+    await nextWrite;
+  } finally {
+    if (writeQueues.get(collectionName) === nextWrite) {
+      writeQueues.delete(collectionName);
+    }
+  }
 }
 
 export function generateId(): string {

@@ -30,7 +30,8 @@ export async function generateRestockSuggestions(businessId: string, horizonDays
   return products.map((product) => {
     const avgDailySales = (soldByProduct.get(product.id) ?? 0) / lookbackDays;
     const predictedDemand = avgDailySales * horizonDays;
-    const suggestedOrder = Math.max(0, Math.ceil(predictedDemand + (product.reorderLevel ?? 0) - product.currentStock));
+    const targetStock = Math.max(predictedDemand, product.reorderLevel ?? 0);
+    const suggestedOrder = Math.max(0, Math.ceil(targetStock - product.currentStock));
 
     return {
       productId: product.id,
