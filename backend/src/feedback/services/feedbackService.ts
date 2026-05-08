@@ -45,7 +45,7 @@ export async function createFeedback(businessId: string, payload: CreateFeedback
     audioUrl: payload.audioUrl,
   });
 
-  await recordEvent(businessId, 'feedback.created', feedback as unknown as Record<string, unknown>);
+  await recordEvent(businessId, 'feedback.created', feedback);
   return feedback;
 }
 

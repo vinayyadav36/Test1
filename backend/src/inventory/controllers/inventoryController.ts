@@ -99,7 +99,7 @@ export async function recordMovementHandler(req: AuthRequest, res: Response, nex
       currentStock: nextStock,
     };
     await productRepository.update(updatedProduct);
-    await recordEvent(req.businessId!, 'inventory.movement', movement as unknown as Record<string, unknown>);
+    await recordEvent(req.businessId!, 'inventory.movement', movement);
 
     res.status(201).json({ data: movement });
   } catch (error) {

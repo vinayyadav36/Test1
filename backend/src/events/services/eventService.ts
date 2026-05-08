@@ -2,21 +2,27 @@ import { eventLogRepository } from '../../storage/repositories/eventLogRepositor
 import { notificationRepository } from '../../storage/repositories/notificationRepository';
 import { generateRestockSuggestions } from '../../inventory/services/forecastingService';
 
-export async function recordEvent(businessId: string, type: string, payload: Record<string, unknown>): Promise<void> {
+export async function recordEvent<T extends object>(businessId: string, type: string, payload: T): Promise<void> {
+  const eventPayload = payload as T & {
+    rating?: number;
+    id?: string;
+    productId?: string;
+  } & Record<string, unknown>;
+
   await eventLogRepository.create({
     businessId,
     type,
-    payload,
+    payload: eventPayload,
   });
 
   if (type === 'feedback.created') {
-    const rating = Number(payload.rating ?? 0);
+    const rating = Number(eventPayload.rating ?? 0);
     if (rating > 0 && rating <= 2) {
       await notificationRepository.create({
         businessId,
         type: 'feedback.negative',
         message: 'New negative feedback needs attention',
-        payload: { feedbackId: payload.id },
+        payload: { feedbackId: eventPayload.id },
         seen: false,
       });
     }
@@ -24,7 +30,7 @@ export async function recordEvent(businessId: string, type: string, payload: Rec
   }
 
   if (type === 'inventory.movement') {
-    const productId = String(payload.productId ?? '');
+    const productId = String(eventPayload.productId ?? '');
     if (!productId) {
       return;
     }
