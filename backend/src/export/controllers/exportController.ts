@@ -9,12 +9,14 @@ import { Feedback } from '../../feedback/models/Feedback';
 import { InventoryMovement } from '../../inventory/models/InventoryMovement';
 import { Product } from '../../inventory/models/Product';
 import { Notification } from '../../notifications/models/Notification';
+import { BusinessSettings } from '../../settings/models/BusinessSettings';
+import { Task } from '../../tasks/models/Task';
 
 export async function getFullExportHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const businessId = req.businessId!;
-    const [business, users, feedback, products, inventoryMovements, events, automationRules, notifications] = await Promise.all([
-      Business.findById(businessId).lean(),
+    const [business, users, feedback, products, inventoryMovements, events, automationRules, notifications, settings, tasks] = await Promise.all([
+      Business.findById(businessId).lean() as Promise<any>,
       User.find({ businessId }).lean(),
       Feedback.find({ businessId }).sort({ createdAt: -1 }).lean(),
       Product.find({ businessId }).sort({ name: 1 }).lean(),
@@ -22,11 +24,14 @@ export async function getFullExportHandler(req: AuthRequest, res: Response, next
       EventLog.find({ businessId }).sort({ createdAt: -1 }).lean(),
       AutomationRule.find({ businessId }).lean(),
       Notification.find({ businessId }).sort({ createdAt: -1 }).lean(),
+      BusinessSettings.findOne({ businessId }).lean() as Promise<any>,
+      Task.find({ businessId }).sort({ createdAt: -1 }).lean(),
     ]);
 
     res.json({
       data: {
         business: business ? mapDocument(business) : null,
+        settings: settings ? mapDocument(settings) : null,
         users: mapDocuments(users),
         feedback: mapDocuments(feedback),
         products: mapDocuments(products),
@@ -34,6 +39,7 @@ export async function getFullExportHandler(req: AuthRequest, res: Response, next
         events: mapDocuments(events),
         automationRules: mapDocuments(automationRules),
         notifications: mapDocuments(notifications),
+        tasks: mapDocuments(tasks),
       },
     });
   } catch (error) {

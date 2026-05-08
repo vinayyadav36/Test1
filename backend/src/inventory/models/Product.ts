@@ -1,17 +1,5 @@
 import { Schema, model } from 'mongoose';
 
-export interface ProductDocument {
-  businessId: Schema.Types.ObjectId;
-  name: string;
-  sku: string;
-  category?: string;
-  unit: string;
-  currentStock: number;
-  reorderLevel?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 const productSchema = new Schema(
   {
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
@@ -21,6 +9,10 @@ const productSchema = new Schema(
     unit: { type: String, required: true, trim: true },
     currentStock: { type: Number, required: true, default: 0 },
     reorderLevel: { type: Number, min: 0 },
+    createdByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
+    updatedByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
+    source: { type: String, enum: ['manual', 'system'], default: 'manual' },
+    archived: { type: Boolean, default: false },
   },
   {
     timestamps: true,
@@ -29,5 +21,6 @@ const productSchema = new Schema(
 );
 
 productSchema.index({ businessId: 1, sku: 1 }, { unique: true });
+productSchema.index({ businessId: 1, category: 1, name: 1 });
 
 export const Product = model<any>('Product', productSchema);

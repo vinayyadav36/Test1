@@ -16,7 +16,7 @@ export async function authMiddleware(req: AuthRequest, _res: Response, next: Nex
       return next(new UnauthorizedError('Invalid demo user id'));
     }
 
-    const user = await User.findById(headerValue).lean();
+    const user = (await User.findById(headerValue).lean()) as any;
 
     if (!user) {
       return next(new UnauthorizedError('Demo user not found'));

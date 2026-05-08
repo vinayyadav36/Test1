@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import { authMiddleware } from '../../core/middleware/authMiddleware';
 import { tenantMiddleware } from '../../core/middleware/tenantMiddleware';
-import { createFeedbackHandler, listFeedbackHandler, updateFeedbackHandler } from '../controllers/feedbackController';
+import { getSettingsHandler, updateSettingsHandler } from '../controllers/settingsController';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.use(tenantMiddleware);
-router.post('/', createFeedbackHandler);
-router.get('/', listFeedbackHandler);
-router.patch('/:id', updateFeedbackHandler);
+router.get('/', getSettingsHandler);
+router.patch('/', updateSettingsHandler);
 
 export default router;

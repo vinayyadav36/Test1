@@ -1,19 +1,14 @@
 import { Schema, model } from 'mongoose';
-import { JsonRecord } from '../../common/types';
-
-export interface EventLogDocument {
-  businessId: Schema.Types.ObjectId;
-  type: string;
-  payload: JsonRecord;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 const eventLogSchema = new Schema(
   {
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
     type: { type: String, required: true, trim: true },
     payload: { type: Schema.Types.Mixed, required: true },
+    createdByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
+    updatedByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
+    source: { type: String, enum: ['manual', 'system'], default: 'system' },
+    archived: { type: Boolean, default: false },
   },
   {
     timestamps: true,

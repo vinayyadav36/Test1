@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 
 export interface BusinessDocument {
   name: string;
@@ -7,9 +7,9 @@ export interface BusinessDocument {
   updatedAt: Date;
 }
 
-interface BusinessModel {
+type BusinessModel = Model<any> & {
   createWithUniqueSlug(name: string): Promise<any>;
-}
+};
 
 function slugify(value: string): string {
   return value
@@ -43,4 +43,4 @@ businessSchema.static('createWithUniqueSlug', async function createWithUniqueSlu
   return this.create({ name, slug });
 });
 
-export const Business = model<any, BusinessModel>('Business', businessSchema);
+export const Business = model<any>('Business', businessSchema) as BusinessModel;
