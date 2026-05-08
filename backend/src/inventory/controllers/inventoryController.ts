@@ -1,25 +1,24 @@
 import { NextFunction, Response } from 'express';
 import { BadRequestError, NotFoundError } from '../../common/errors';
-import { AuthRequest } from '../../common/types';
-import { mapDocument, mapDocuments, normalizeDocument } from '../../common/utils';
+import { AuthRequest, InventoryMovementType, Product } from '../../common/types';
 import { recordEvent } from '../../events/services/eventService';
-import { InventoryMovement } from '../models/InventoryMovement';
-import { Product } from '../models/Product';
+import { inventoryMovementRepository } from '../../storage/repositories/inventoryMovementRepository';
+import { productRepository } from '../../storage/repositories/productRepository';
 import { generateRestockSuggestions } from '../services/forecastingService';
 
 function parseQuantity(value: unknown): number {
   const quantity = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(quantity) || quantity === 0) {
-    throw new BadRequestError('quantity must be a non-zero number');
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    throw new BadRequestError('quantity must be greater than zero');
   }
   return quantity;
 }
 
-function parseMovementType(value: unknown): 'sale' | 'purchase' | 'adjustment' {
+function parseMovementType(value: unknown): InventoryMovementType {
   if (value === 'sale' || value === 'purchase' || value === 'adjustment') {
     return value;
   }
-  throw new BadRequestError('type must be one of sale, purchase, or adjustment');
+  throw new BadRequestError('type must be sale, purchase, or adjustment');
 }
 
 export async function createProductHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -29,21 +28,22 @@ export async function createProductHandler(req: AuthRequest, res: Response, next
       throw new BadRequestError('name, sku, and unit are required');
     }
 
-    const product = await Product.create({
-      businessId: req.businessId,
+    const existing = await productRepository.findBySku(req.businessId!, sku);
+    if (existing) {
+      throw new BadRequestError('sku must be unique within the business');
+    }
+
+    const product = await productRepository.create({
+      businessId: req.businessId!,
       name,
       sku,
       category: typeof category === 'string' ? category : undefined,
       unit,
       currentStock: typeof currentStock === 'number' ? currentStock : Number(currentStock ?? 0) || 0,
       reorderLevel: typeof reorderLevel === 'number' ? reorderLevel : reorderLevel !== undefined ? Number(reorderLevel) : undefined,
-      createdByUserId: req.user?.id,
-      updatedByUserId: req.user?.id,
-      source: 'manual',
-      archived: false,
     });
 
-    res.status(201).json({ data: mapDocument(normalizeDocument(product)) });
+    res.status(201).json({ data: product });
   } catch (error) {
     next(error);
   }
@@ -51,28 +51,8 @@ export async function createProductHandler(req: AuthRequest, res: Response, next
 
 export async function listProductsHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const query: Record<string, unknown> = { businessId: req.businessId, archived: false };
-    if (typeof req.query.category === 'string') {
-      query.category = req.query.category;
-    }
-
-    const products = await Product.find(query).sort({ name: 1 }).lean();
-    const suggestions = await generateRestockSuggestions(req.businessId!);
-    const suggestionMap = new Map(suggestions.map((item) => [item.productId, item]));
-
-    const filteredProducts = mapDocuments(products)
-      .map((product: any) => ({ ...product, insight: suggestionMap.get(product.id) ?? null }))
-      .filter((product: any) => {
-        if (typeof req.query.stockCondition !== 'string' || !product.insight) {
-          return true;
-        }
-        if (req.query.stockCondition === 'low') {
-          return product.insight.suggestedOrder > 0;
-        }
-        return product.insight.severity === req.query.stockCondition;
-      });
-
-    res.json({ data: filteredProducts });
+    const products = await productRepository.listByBusinessId(req.businessId!);
+    res.json({ data: products });
   } catch (error) {
     next(error);
   }
@@ -87,42 +67,41 @@ export async function recordMovementHandler(req: AuthRequest, res: Response, nex
 
     const movementType = parseMovementType(type);
     const parsedQuantity = parseQuantity(quantity);
-    const product = await Product.findOne({ _id: productId, businessId: req.businessId, archived: false });
+    const product = await productRepository.findById(productId, req.businessId!);
     if (!product) {
       throw new NotFoundError('Product not found');
     }
 
-    const signedQuantity = movementType === 'sale' ? -Math.abs(parsedQuantity) : movementType === 'purchase' ? Math.abs(parsedQuantity) : parsedQuantity;
-    const nextStock = product.currentStock + signedQuantity;
+    let nextStock = product.currentStock;
+    if (movementType === 'sale') {
+      nextStock -= parsedQuantity;
+    } else if (movementType === 'purchase') {
+      nextStock += parsedQuantity;
+    } else {
+      nextStock += parsedQuantity;
+    }
+
     if (nextStock < 0) {
       throw new BadRequestError('movement would make stock negative');
     }
 
-    const movement = await InventoryMovement.create({
-      businessId: req.businessId,
-      productId: product._id,
+    const movement = await inventoryMovementRepository.create({
+      businessId: req.businessId!,
+      productId,
       type: movementType,
-      quantity: Math.abs(parsedQuantity),
-      date: typeof date === 'string' ? new Date(date) : new Date(),
+      quantity: parsedQuantity,
+      date: typeof date === 'string' ? date : new Date().toISOString(),
       note: typeof note === 'string' ? note : undefined,
-      createdByUserId: req.user?.id,
-      updatedByUserId: req.user?.id,
-      source: 'manual',
-      archived: false,
     });
 
-    product.currentStock = nextStock;
-    product.updatedByUserId = req.user?.id;
-    await product.save();
+    const updatedProduct: Product = {
+      ...product,
+      currentStock: nextStock,
+    };
+    await productRepository.update(updatedProduct);
+    await recordEvent(req.businessId!, 'inventory.movement', movement as unknown as Record<string, unknown>);
 
-    const mappedMovement = mapDocument(normalizeDocument(movement));
-    await recordEvent(req.businessId!, 'inventory.movement', {
-      ...mappedMovement,
-      productId: String(product._id),
-      currentStock: product.currentStock,
-    }, req.user?.id);
-
-    res.status(201).json({ data: mappedMovement });
+    res.status(201).json({ data: movement });
   } catch (error) {
     next(error);
   }
@@ -130,7 +109,8 @@ export async function recordMovementHandler(req: AuthRequest, res: Response, nex
 
 export async function getRestockSuggestionsHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const suggestions = await generateRestockSuggestions(req.businessId!);
+    const horizonDays = Math.max(1, Number.parseInt(String(req.query.horizonDays ?? '7'), 10) || 7);
+    const suggestions = await generateRestockSuggestions(req.businessId!, horizonDays);
     res.json({ data: suggestions });
   } catch (error) {
     next(error);

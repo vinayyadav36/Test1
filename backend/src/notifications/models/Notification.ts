@@ -1,24 +1,3 @@
-import { Schema, model } from 'mongoose';
+import { Notification } from '../../common/types';
 
-const notificationSchema = new Schema(
-  {
-    businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
-    type: { type: String, required: true, trim: true },
-    message: { type: String, required: true, trim: true },
-    payload: { type: Schema.Types.Mixed },
-    seen: { type: Boolean, required: true, default: false },
-    createdByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
-    updatedByUserId: { type: Schema.Types.ObjectId, ref: 'User' },
-    source: { type: String, enum: ['manual', 'system'], default: 'system' },
-    archived: { type: Boolean, default: false },
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-  },
-);
-
-notificationSchema.index({ businessId: 1, seen: 1, createdAt: -1 });
-notificationSchema.index({ businessId: 1, type: 1, createdAt: -1 });
-
-export const Notification = model<any>('Notification', notificationSchema);
+export type NotificationDocument = Notification;

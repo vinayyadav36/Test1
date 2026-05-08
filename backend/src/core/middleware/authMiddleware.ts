@@ -1,30 +1,28 @@
 import { NextFunction, Response } from 'express';
-import { AuthRequest } from '../../common/types';
 import { UnauthorizedError } from '../../common/errors';
-import { isObjectId } from '../../common/utils';
-import { User } from '../models/User';
+import { AuthRequest } from '../../common/types';
+import { config } from '../../config/env';
+import { userRepository } from '../../storage/repositories/userRepository';
 
 export async function authMiddleware(req: AuthRequest, _res: Response, next: NextFunction): Promise<void> {
   try {
-    const headerValue = req.header('x-demo-user-id');
-
-    if (!headerValue) {
-      return next(new UnauthorizedError('Missing x-demo-user-id header'));
+    if (!config.enableDemoAuth) {
+      throw new UnauthorizedError('Demo auth is disabled');
     }
 
-    if (!isObjectId(headerValue)) {
-      return next(new UnauthorizedError('Invalid demo user id'));
+    const userId = req.header('x-demo-user-id');
+    if (!userId) {
+      throw new UnauthorizedError('Missing x-demo-user-id header');
     }
 
-    const user = (await User.findById(headerValue).lean()) as any;
-
+    const user = await userRepository.findById(userId);
     if (!user) {
-      return next(new UnauthorizedError('Demo user not found'));
+      throw new UnauthorizedError('Demo user not found');
     }
 
     req.user = {
-      id: String(user._id),
-      businessId: String(user.businessId),
+      id: user.id,
+      businessId: user.businessId,
       name: user.name,
       email: user.email,
       role: user.role,

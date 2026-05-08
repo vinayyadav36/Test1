@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
 import { AppError } from './errors';
 import { logger } from './logger';
 
@@ -10,27 +9,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
         message: err.message,
         code: err.code,
         details: err.details,
-      },
-    });
-    return;
-  }
-
-  if (err instanceof mongoose.Error.ValidationError) {
-    res.status(422).json({
-      error: {
-        message: 'Validation failed',
-        code: 'VALIDATION_ERROR',
-        details: Object.values(err.errors).map((issue) => issue.message),
-      },
-    });
-    return;
-  }
-
-  if (err instanceof mongoose.Error && 'code' in err && err.code === 11000) {
-    res.status(409).json({
-      error: {
-        message: 'Duplicate value',
-        code: 'DUPLICATE_KEY',
       },
     });
     return;

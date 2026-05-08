@@ -7,10 +7,7 @@ async function start(): Promise<void> {
   await connectDB();
 
   app.listen(config.port, () => {
-    logger.info('server.started', {
-      port: config.port,
-      env: config.nodeEnv,
-    });
+    logger.info('server.started', { port: config.port, env: config.nodeEnv });
   });
 }
 

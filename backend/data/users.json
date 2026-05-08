@@ -1,0 +1,12 @@
+[
+  {
+    "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+    "name": "Demo Owner",
+    "email": "owner@demo.local",
+    "passwordHash": "demo-password",
+    "role": "owner",
+    "id": "3c181298-b873-4f9a-8001-1df40df178e1",
+    "createdAt": "2026-05-08T10:21:33.501Z",
+    "updatedAt": "2026-05-08T10:21:33.501Z"
+  }
+]

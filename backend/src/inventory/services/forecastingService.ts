@@ -1,113 +1,45 @@
-import { Types } from 'mongoose';
-import { InventoryMovement } from '../models/InventoryMovement';
-import { Product } from '../models/Product';
-import { BusinessSettings } from '../../settings/models/BusinessSettings';
+import { inventoryMovementRepository } from '../../storage/repositories/inventoryMovementRepository';
+import { productRepository } from '../../storage/repositories/productRepository';
 
 export interface RestockSuggestion {
   productId: string;
   name: string;
   sku: string;
-  unit: string;
-  category?: string;
   currentStock: number;
-  reorderLevel?: number;
   avgDailySales: number;
   predictedDemand: number;
-  daysOfStockLeft: number | null;
   suggestedOrder: number;
-  movementLabel: 'fast-moving' | 'slow-moving' | 'stable';
-  severity: 'none' | 'warning' | 'critical';
 }
 
 function round(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function getMovementLabel(avgDailySales: number): 'fast-moving' | 'slow-moving' | 'stable' {
-  if (avgDailySales >= 5) {
-    return 'fast-moving';
+export async function generateRestockSuggestions(businessId: string, horizonDays = 7, lookbackDays = 30): Promise<RestockSuggestion[]> {
+  const products = await productRepository.listByBusinessId(businessId);
+  const since = new Date();
+  since.setDate(since.getDate() - lookbackDays);
+
+  const sales = await inventoryMovementRepository.listSalesByBusinessIdSince(businessId, since.toISOString());
+  const soldByProduct = new Map<string, number>();
+
+  for (const sale of sales) {
+    soldByProduct.set(sale.productId, (soldByProduct.get(sale.productId) ?? 0) + sale.quantity);
   }
-  if (avgDailySales > 0 && avgDailySales <= 1) {
-    return 'slow-moving';
-  }
-  return 'stable';
-}
-
-function getSeverity(daysOfStockLeft: number | null, warningDays: number, criticalDays: number): 'none' | 'warning' | 'critical' {
-  if (daysOfStockLeft === null) {
-    return 'none';
-  }
-  if (daysOfStockLeft <= criticalDays) {
-    return 'critical';
-  }
-  if (daysOfStockLeft <= warningDays) {
-    return 'warning';
-  }
-  return 'none';
-}
-
-async function getSalesAveragesByProduct(businessId: string, days = 30): Promise<Map<string, number>> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-
-  const rows = await InventoryMovement.aggregate<{ _id: Types.ObjectId; totalSold: number }>([
-    {
-      $match: {
-        businessId: new Types.ObjectId(businessId),
-        type: 'sale',
-        archived: false,
-        date: { $gte: startDate },
-      },
-    },
-    {
-      $group: {
-        _id: '$productId',
-        totalSold: { $sum: '$quantity' },
-      },
-    },
-  ]);
-
-  return new Map(rows.map((row) => [String(row._id), row.totalSold / days]));
-}
-
-export async function generateRestockSuggestions(businessId: string): Promise<RestockSuggestion[]> {
-  const [products, salesMap, settings] = await Promise.all([
-    Product.find({ businessId, archived: false }).sort({ name: 1 }).lean() as Promise<any[]>,
-    getSalesAveragesByProduct(businessId),
-    BusinessSettings.findOne({ businessId }).lean() as Promise<any>,
-  ]);
-
-  const forecastHorizonDays = settings?.forecastHorizonDays ?? 7;
-  const safetyFactor = settings?.safetyFactor ?? 1.2;
-  const warningDays = settings?.notificationThresholds?.lowStockWarningDays ?? 7;
-  const criticalDays = settings?.notificationThresholds?.lowStockCriticalDays ?? 3;
 
   return products.map((product) => {
-    const avgDailySales = salesMap.get(String(product._id)) ?? 0;
-    const predictedDemand = avgDailySales * forecastHorizonDays * safetyFactor;
-    const baseline = product.reorderLevel ?? 0;
-    const suggestedOrder = Math.max(0, Math.ceil(predictedDemand + baseline - product.currentStock));
-    const daysOfStockLeft = avgDailySales > 0 ? round(product.currentStock / avgDailySales) : null;
+    const avgDailySales = (soldByProduct.get(product.id) ?? 0) / lookbackDays;
+    const predictedDemand = avgDailySales * horizonDays;
+    const suggestedOrder = Math.max(0, Math.ceil(predictedDemand + (product.reorderLevel ?? 0) - product.currentStock));
 
     return {
-      productId: String(product._id),
+      productId: product.id,
       name: product.name,
       sku: product.sku,
-      unit: product.unit,
-      category: product.category,
       currentStock: product.currentStock,
-      reorderLevel: product.reorderLevel,
       avgDailySales: round(avgDailySales),
       predictedDemand: round(predictedDemand),
-      daysOfStockLeft,
       suggestedOrder,
-      movementLabel: getMovementLabel(avgDailySales),
-      severity: getSeverity(daysOfStockLeft, warningDays, criticalDays),
     };
   });
-}
-
-export async function getRestockSuggestionForProduct(businessId: string, productId: string): Promise<RestockSuggestion | null> {
-  const suggestions = await generateRestockSuggestions(businessId);
-  return suggestions.find((suggestion) => suggestion.productId === productId) ?? null;
 }

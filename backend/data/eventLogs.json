@@ -1,0 +1,37 @@
+[
+  {
+    "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+    "type": "feedback.created",
+    "payload": {
+      "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+      "rating": 2,
+      "transcript": "Stock missing",
+      "sentiment": "negative",
+      "serviceType": "walk-in",
+      "staffName": "Asha",
+      "id": "d2003eb9-e752-425a-84bd-4c4705df25d0",
+      "createdAt": "2026-05-08T10:22:04.553Z",
+      "updatedAt": "2026-05-08T10:22:04.553Z"
+    },
+    "id": "ff5125e4-d8d4-404c-bdd4-7d423cff13d7",
+    "createdAt": "2026-05-08T10:22:04.554Z",
+    "updatedAt": "2026-05-08T10:22:04.554Z"
+  },
+  {
+    "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+    "type": "inventory.movement",
+    "payload": {
+      "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+      "productId": "39665300-18dc-4a8b-8d42-e5f37d660acf",
+      "type": "sale",
+      "quantity": 4,
+      "date": "2026-05-08T10:22:10.000Z",
+      "id": "590cc1e5-7242-4ba9-9b98-87300216c882",
+      "createdAt": "2026-05-08T10:22:04.553Z",
+      "updatedAt": "2026-05-08T10:22:04.553Z"
+    },
+    "id": "d3c52cfc-6c55-4a9d-9ac2-08c1d8218a14",
+    "createdAt": "2026-05-08T10:22:04.555Z",
+    "updatedAt": "2026-05-08T10:22:04.555Z"
+  }
+]

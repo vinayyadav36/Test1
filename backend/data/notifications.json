@@ -1,0 +1,32 @@
+[
+  {
+    "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+    "type": "feedback.negative",
+    "message": "New negative feedback needs attention",
+    "payload": {
+      "feedbackId": "d2003eb9-e752-425a-84bd-4c4705df25d0"
+    },
+    "seen": false,
+    "id": "e55bfec2-297f-45b6-9a48-7e122a10f812",
+    "createdAt": "2026-05-08T10:22:04.555Z",
+    "updatedAt": "2026-05-08T10:22:04.555Z"
+  },
+  {
+    "businessId": "53021d0f-274a-4569-8d48-a50b2f952a75",
+    "type": "inventory.restock",
+    "message": "Restock suggested for Rice",
+    "payload": {
+      "productId": "39665300-18dc-4a8b-8d42-e5f37d660acf",
+      "name": "Rice",
+      "sku": "RICE-1",
+      "currentStock": 1,
+      "avgDailySales": 0.13,
+      "predictedDemand": 0.93,
+      "suggestedOrder": 10
+    },
+    "seen": false,
+    "id": "b8575828-4b26-4db1-8f3f-cc5ac12bdbac",
+    "createdAt": "2026-05-08T10:22:04.557Z",
+    "updatedAt": "2026-05-08T10:22:04.557Z"
+  }
+]
