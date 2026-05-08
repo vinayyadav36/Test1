@@ -1,7 +1,7 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-export interface IProduct extends Document {
-  businessId: mongoose.Types.ObjectId;
+export interface ProductDocument {
+  businessId: Schema.Types.ObjectId;
   name: string;
   sku: string;
   category?: string;
@@ -12,19 +12,22 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-const ProductSchema = new Schema<IProduct>(
+const productSchema = new Schema(
   {
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
-    name: { type: String, required: true },
-    sku: { type: String, required: true },
-    category: { type: String },
-    unit: { type: String, required: true },
-    currentStock: { type: Number, default: 0 },
-    reorderLevel: { type: Number },
+    name: { type: String, required: true, trim: true },
+    sku: { type: String, required: true, trim: true },
+    category: { type: String, trim: true },
+    unit: { type: String, required: true, trim: true },
+    currentStock: { type: Number, required: true, default: 0 },
+    reorderLevel: { type: Number, min: 0 },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-ProductSchema.index({ businessId: 1, sku: 1 }, { unique: true });
+productSchema.index({ businessId: 1, sku: 1 }, { unique: true });
 
-export const Product = mongoose.model<IProduct>('Product', ProductSchema);
+export const Product = model<any>('Product', productSchema);

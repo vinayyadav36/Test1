@@ -1,20 +1,46 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-export interface IBusiness extends Document {
+export interface BusinessDocument {
   name: string;
   slug: string;
-  ownerUserId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const BusinessSchema = new Schema<IBusiness>(
+interface BusinessModel {
+  createWithUniqueSlug(name: string): Promise<any>;
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'business';
+}
+
+const businessSchema = new Schema(
   {
-    name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    ownerUserId: { type: Schema.Types.ObjectId, ref: 'User' },
+    name: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-export const Business = mongoose.model<IBusiness>('Business', BusinessSchema);
+businessSchema.static('createWithUniqueSlug', async function createWithUniqueSlug(name: string) {
+  const baseSlug = slugify(name);
+  let slug = baseSlug;
+  let suffix = 1;
+
+  while (await this.exists({ slug })) {
+    suffix += 1;
+    slug = `${baseSlug}-${suffix}`;
+  }
+
+  return this.create({ name, slug });
+});
+
+export const Business = model<any, BusinessModel>('Business', businessSchema);

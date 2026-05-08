@@ -1,35 +1,76 @@
-import { Feedback, IFeedback } from '../models/Feedback';
-import { PaginationParams, PaginatedResponse } from '../../common/types';
+import { BadRequestError } from '../../common/errors';
+import { mapDocument, mapDocuments, normalizeDocument } from '../../common/utils';
+import { PaginatedResponse, PaginationParams } from '../../common/types';
+import { recordEvent } from '../../events/services/eventService';
+import { Feedback, FeedbackDocument, FeedbackSentiment } from '../models/Feedback';
 
 export interface CreateFeedbackPayload {
+  customerPhone?: string;
   rating?: number;
   transcript?: string;
-  sentiment?: 'positive' | 'neutral' | 'negative' | null;
+  sentiment?: FeedbackSentiment;
   serviceType?: string;
   staffName?: string;
-  customerPhone?: string;
+  audioUrl?: string;
+}
+
+function deriveSentiment(payload: CreateFeedbackPayload): FeedbackSentiment | undefined {
+  if (payload.sentiment) {
+    return payload.sentiment;
+  }
+
+  if (payload.rating === undefined) {
+    return undefined;
+  }
+
+  if (payload.rating <= 2) {
+    return 'negative';
+  }
+
+  if (payload.rating >= 4) {
+    return 'positive';
+  }
+
+  return 'neutral';
 }
 
 export async function createFeedback(
   businessId: string,
-  payload: CreateFeedbackPayload
-): Promise<IFeedback> {
-  const feedback = new Feedback({
+  payload: CreateFeedbackPayload,
+): Promise<ReturnType<typeof mapDocument>> {
+  if (payload.rating !== undefined && (payload.rating < 1 || payload.rating > 5)) {
+    throw new BadRequestError('rating must be between 1 and 5');
+  }
+
+  const feedback = await Feedback.create({
     businessId,
     ...payload,
-    audioUrl: null,
+    sentiment: deriveSentiment(payload),
   });
-  return feedback.save();
+
+  const mappedFeedback = mapDocument(normalizeDocument(feedback));
+  await recordEvent(businessId, 'feedback.created', mappedFeedback);
+
+  return mappedFeedback;
 }
 
 export async function getFeedbackList(
   businessId: string,
-  pagination: PaginationParams
-): Promise<PaginatedResponse<IFeedback>> {
-  const { page, limit, skip } = pagination;
-  const [data, total] = await Promise.all([
-    Feedback.find({ businessId }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+  pagination: PaginationParams,
+): Promise<PaginatedResponse<ReturnType<typeof mapDocument>>> {
+  const [feedback, total] = await Promise.all([
+    Feedback.find({ businessId })
+      .sort({ createdAt: -1 })
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .lean(),
     Feedback.countDocuments({ businessId }),
   ]);
-  return { data: data as unknown as IFeedback[], total, page, limit };
+
+  return {
+    data: mapDocuments(feedback),
+    total,
+    page: pagination.page,
+    limit: pagination.limit,
+  };
 }

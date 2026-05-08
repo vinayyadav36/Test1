@@ -1,15 +1,18 @@
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
-export interface UserDoc {
-  _id: string;
+export type UserRole = 'owner' | 'staff' | 'admin';
+
+export interface AuthUser {
+  id: string;
   businessId: string;
   name: string;
   email: string;
-  role: 'owner' | 'staff' | 'admin';
+  role: UserRole;
 }
 
 export interface AuthRequest extends Request {
-  user?: UserDoc;
+  user?: AuthUser;
   businessId?: string;
 }
 
@@ -25,3 +28,13 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
 }
+
+export type JsonRecord = Record<string, unknown>;
+
+export interface BaseDocumentFields {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type ObjectIdLike = string | Types.ObjectId;

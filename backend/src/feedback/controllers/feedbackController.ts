@@ -1,41 +1,31 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import { AuthRequest } from '../../common/types';
-import { createFeedback, getFeedbackList } from '../services/feedbackService';
 import { parsePagination } from '../../common/utils';
+import { createFeedback, getFeedbackList } from '../services/feedbackService';
 
-export async function createFeedbackHandler(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function createFeedbackHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { rating, transcript, sentiment, serviceType, staffName, customerPhone } = req.body as Record<string, unknown>;
-    const businessId = req.businessId!;
-    const feedback = await createFeedback(businessId, {
-      rating: rating !== undefined ? Number(rating) : undefined,
-      transcript: transcript as string | undefined,
-      sentiment: sentiment as 'positive' | 'neutral' | 'negative' | null | undefined,
-      serviceType: serviceType as string | undefined,
-      staffName: staffName as string | undefined,
-      customerPhone: customerPhone as string | undefined,
+    const feedback = await createFeedback(req.businessId!, {
+      customerPhone: typeof req.body.customerPhone === 'string' ? req.body.customerPhone : undefined,
+      rating: typeof req.body.rating === 'number' ? req.body.rating : typeof req.body.rating === 'string' ? Number(req.body.rating) : undefined,
+      transcript: typeof req.body.transcript === 'string' ? req.body.transcript : undefined,
+      sentiment: typeof req.body.sentiment === 'string' ? req.body.sentiment : undefined,
+      serviceType: typeof req.body.serviceType === 'string' ? req.body.serviceType : undefined,
+      staffName: typeof req.body.staffName === 'string' ? req.body.staffName : undefined,
+      audioUrl: typeof req.body.audioUrl === 'string' ? req.body.audioUrl : undefined,
     });
-    res.status(201).json(feedback);
-  } catch (err) {
-    next(err);
+
+    res.status(201).json({ data: feedback });
+  } catch (error) {
+    next(error);
   }
 }
 
-export async function listFeedbackHandler(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export async function listFeedbackHandler(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const businessId = req.businessId!;
-    const pagination = parsePagination(req.query as Record<string, unknown>);
-    const result = await getFeedbackList(businessId, pagination);
+    const result = await getFeedbackList(req.businessId!, parsePagination(req.query as Record<string, unknown>));
     res.json(result);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 }

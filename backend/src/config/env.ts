@@ -1,8 +1,24 @@
 import dotenv from 'dotenv';
+
 dotenv.config();
 
+type NodeEnv = 'development' | 'test' | 'production';
+
+function requireEnv(name: 'MONGO_URI'): string {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+const nodeEnv = (process.env.NODE_ENV?.trim() || 'development') as NodeEnv;
+
 export const config = {
-  port: parseInt(process.env.PORT || '4000', 10),
-  mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/sme_sync',
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-later',
+  port: Number.parseInt(process.env.PORT ?? '4000', 10) || 4000,
+  mongoUri: requireEnv('MONGO_URI'),
+  nodeEnv,
+  corsOrigin: process.env.CORS_ORIGIN?.trim() || 'http://localhost:5173',
 };

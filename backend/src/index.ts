@@ -1,15 +1,22 @@
-import { config } from './config/env';
-import { connectDB } from './config/db';
 import app from './app';
+import { logger } from './common/logger';
+import { connectDB } from './config/db';
+import { config } from './config/env';
 
-async function main(): Promise<void> {
+async function start(): Promise<void> {
   await connectDB();
+
   app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+    logger.info('server.started', {
+      port: config.port,
+      env: config.nodeEnv,
+    });
   });
 }
 
-main().catch((err) => {
-  console.error('Failed to start server:', err);
+start().catch((error) => {
+  logger.error('server.start_failed', {
+    error: error instanceof Error ? error.message : 'Unknown error',
+  });
   process.exit(1);
 });
