@@ -18,8 +18,8 @@ export function resolveApiBaseUrl(value?: string): string {
     if (LOCAL_HOSTS.has(parsedUrl.hostname)) {
       return raw;
     }
-  } catch (error) {
-    void error;
+  } catch {
+    return LOCAL_FALLBACK_URL;
   }
 
   return LOCAL_FALLBACK_URL;
