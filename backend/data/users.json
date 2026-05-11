@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "businessId": "af6a1f81-0684-4f54-b644-c94314605885",
+    "name": "Owner",
+    "email": "owner@test.local",
+    "passwordHash": "demo",
+    "role": "owner",
+    "id": "d4bb8b57-cbae-4ae3-97c5-a824363b33ce",
+    "createdAt": "2026-05-11T09:49:09.701Z",
+    "updatedAt": "2026-05-11T09:49:09.701Z"
+  },
+  {
+    "businessId": "3a8d5c56-1fc1-4032-b43b-6f4a10cfe168",
+    "name": "Other Owner",
+    "email": "other@test.local",
+    "passwordHash": "demo",
+    "role": "owner",
+    "id": "2fdbaa28-ff66-495a-942f-2b5f02475a5d",
+    "createdAt": "2026-05-11T09:49:09.702Z",
+    "updatedAt": "2026-05-11T09:49:09.702Z"
+  },
+  {
+    "businessId": "fa08344c-6711-467e-aa19-5e29649091fd",
+    "name": "Demo Owner",
+    "email": "owner@demo.local",
+    "passwordHash": "demo-password",
+    "role": "owner",
+    "id": "3fb47977-5673-4fa2-98d6-2c0b4fe22a95",
+    "createdAt": "2026-05-11T09:49:27.945Z",
+    "updatedAt": "2026-05-11T09:49:27.945Z"
+  }
+]

@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "businessId": "af6a1f81-0684-4f54-b644-c94314605885",
+    "type": "inventory.restock",
+    "message": "Restock suggested for Rice",
+    "payload": {
+      "productId": "65de64aa-04ee-4686-a11d-9688a274a026",
+      "name": "Rice",
+      "sku": "RICE-1",
+      "currentStock": 1,
+      "avgDailySales": 0,
+      "predictedDemand": 0,
+      "suggestedOrder": 9
+    },
+    "seen": false,
+    "id": "5226d9b6-658c-49ef-934a-621b3817d059",
+    "createdAt": "2026-05-11T09:49:09.713Z",
+    "updatedAt": "2026-05-11T09:49:09.713Z"
+  }
+]
