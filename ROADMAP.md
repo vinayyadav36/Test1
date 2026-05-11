@@ -8,7 +8,7 @@ Build a lightweight, multi-tenant SaaS platform for small and medium businesses 
 
 ## Architecture
 
-- **Backend**: Node.js + Express + TypeScript, MongoDB (Mongoose), multi-tenant via `businessId` scoping.
+- **Backend**: Node.js + Express + TypeScript with local JSON document storage (`backend/data`), multi-tenant via `businessId` scoping.
 - **Frontend**: React + TypeScript (Vite), Axios, React Router.
 - **Auth**: Demo header-based auth (`x-demo-user-id`); designed for JWT replacement in v2.
 - **Monorepo**: Root `package.json` with workspace scripts for backend and frontend.
@@ -57,9 +57,9 @@ Build a lightweight, multi-tenant SaaS platform for small and medium businesses 
 ## Future Plans
 
 - **v2**: Replace demo header auth with proper JWT authentication (bcrypt password hashing, refresh tokens).
-- **Voice Feedback**: Integrate audio upload + transcription (e.g., Whisper API) for voice-based feedback capture.
-- **Sentiment Analysis**: Auto-classify feedback sentiment using NLP (e.g., OpenAI or local model).
-- **SMS Notifications**: Alert owners when stock drops below reorder level.
+- **Voice Feedback**: Add optional offline/local transcription for voice-based feedback capture.
+- **Sentiment Analysis**: Auto-classify feedback sentiment using local NLP models.
+- **In-App Alerts**: Alert owners inside the platform when stock drops below reorder level.
 - **Analytics Dashboard**: Charts for feedback trends, top-rated staff, stock velocity.
 - **Role-based Access Control**: Granular permissions per module per role.
 - **Offline Support**: PWA with service workers for kirana shops with intermittent connectivity.
