@@ -15,10 +15,11 @@ export function resolveApiBaseUrl(value?: string): string {
 
   try {
     const parsedUrl = new URL(raw);
-    if (LOCAL_HOSTS.has(parsedUrl.hostname)) {
+    if (LOCAL_HOSTS.has(parsedUrl.hostname.toLowerCase())) {
       return raw;
     }
   } catch {
+    // Invalid configured URL should not break startup; use local fallback instead.
     return LOCAL_FALLBACK_URL;
   }
 
