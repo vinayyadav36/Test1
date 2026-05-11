@@ -5,6 +5,7 @@ describe('resolveApiBaseUrl', () => {
   it('keeps localhost URLs', () => {
     expect(resolveApiBaseUrl('http://localhost:4000')).toBe('http://localhost:4000')
     expect(resolveApiBaseUrl('http://127.0.0.1:8080')).toBe('http://127.0.0.1:8080')
+    expect(resolveApiBaseUrl('http://[::1]:4000')).toBe('http://[::1]:4000')
   })
 
   it('keeps relative URLs', () => {

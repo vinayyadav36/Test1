@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const LOCAL_FALLBACK_URL = 'http://localhost:4000';
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 
 export function resolveApiBaseUrl(value?: string): string {
   const raw = value?.trim();
@@ -15,7 +15,8 @@ export function resolveApiBaseUrl(value?: string): string {
 
   try {
     const parsedUrl = new URL(raw);
-    if (LOCAL_HOSTS.has(parsedUrl.hostname.toLowerCase())) {
+    const hostname = parsedUrl.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+    if (LOCAL_HOSTS.has(hostname)) {
       return raw;
     }
   } catch {
