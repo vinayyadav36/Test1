@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:4000';
-let userId = localStorage.getItem('userId') || import.meta.env.VITE_USER_ID || '';
+let userId = localStorage.getItem('sme_userId') || '';
 
 const client = axios.create({
   baseURL: BASE_URL,
@@ -12,14 +12,14 @@ const client = axios.create({
 
 client.interceptors.request.use((config) => {
   if (userId) {
-    config.headers['x-user-id'] = userId;
+    config.headers['x-demo-user-id'] = userId;
   }
   return config;
 });
 
 export function setUserId(value: string): void {
   userId = value;
-  localStorage.setItem('userId', value);
+  localStorage.setItem('sme_userId', value);
 }
 
 export function getUserId(): string {

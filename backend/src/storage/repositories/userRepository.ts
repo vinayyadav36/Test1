@@ -22,6 +22,11 @@ export const userRepository = {
     return users.find((user) => user.email === email.toLowerCase());
   },
 
+  async findFirst(): Promise<User | undefined> {
+    const users = await readUsers();
+    return users[0];
+  },
+
   async create(input: { businessId: string; name: string; email: string; passwordHash: string; role: UserRole }): Promise<User> {
     const users = await readUsers();
     const user = addTimestamps<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>({

@@ -1,16 +1,9 @@
 [
   {
-    "name": "Test Kirana",
-    "slug": "test-kirana",
-    "id": "c05f9497-a7d4-4f60-a00c-08993a8aba1c",
-    "createdAt": "2026-05-16T07:06:18.783Z",
-    "updatedAt": "2026-05-16T07:06:18.783Z"
-  },
-  {
-    "name": "Other Kirana",
-    "slug": "other-kirana",
-    "id": "7d464e27-f608-458c-a697-e777df852330",
-    "createdAt": "2026-05-16T07:06:18.870Z",
-    "updatedAt": "2026-05-16T07:06:18.870Z"
+    "id": "c83d9792-dfb1-472f-8348-408c7f602613",
+    "name": "Default Business",
+    "slug": "default-business",
+    "createdAt": "2026-05-17T07:17:10.840Z",
+    "updatedAt": "2026-05-17T07:17:10.840Z"
   }
 ]

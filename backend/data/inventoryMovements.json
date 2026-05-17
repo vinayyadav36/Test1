@@ -1,12 +1,22 @@
 [
   {
-    "businessId": "c05f9497-a7d4-4f60-a00c-08993a8aba1c",
-    "productId": "6ba987f4-5999-4bc7-a065-c49f1ecb654e",
+    "businessId": "c83d9792-dfb1-472f-8348-408c7f602613",
+    "productId": "75b1f94d-5579-4412-b1f5-ff3466355cde",
+    "type": "purchase",
+    "quantity": 1,
+    "date": "2026-05-17T00:00:00.000Z",
+    "id": "21386e6a-75ac-416c-9129-82f8b3bd3f93",
+    "createdAt": "2026-05-17T07:20:09.155Z",
+    "updatedAt": "2026-05-17T07:20:09.155Z"
+  },
+  {
+    "businessId": "c83d9792-dfb1-472f-8348-408c7f602613",
+    "productId": "75b1f94d-5579-4412-b1f5-ff3466355cde",
     "type": "sale",
-    "quantity": 4,
-    "date": "2026-01-01T00:00:00.000Z",
-    "id": "0ed2537c-ebea-4c9f-bd86-af1fcfaf019e",
-    "createdAt": "2026-05-16T07:06:19.088Z",
-    "updatedAt": "2026-05-16T07:06:19.088Z"
+    "quantity": 11,
+    "date": "2026-05-17T00:00:00.000Z",
+    "id": "5f1928c8-e6d7-4024-b08d-c6d1abf3220c",
+    "createdAt": "2026-05-17T07:20:19.572Z",
+    "updatedAt": "2026-05-17T07:20:19.572Z"
   }
 ]

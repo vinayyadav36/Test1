@@ -1,22 +1,12 @@
 [
   {
-    "businessId": "c05f9497-a7d4-4f60-a00c-08993a8aba1c",
-    "name": "Owner",
-    "email": "owner@test.local",
-    "passwordHash": "demo",
-    "role": "owner",
-    "id": "dd144119-ad60-4e9b-9522-15ceb58f28f7",
-    "createdAt": "2026-05-16T07:06:18.922Z",
-    "updatedAt": "2026-05-16T07:06:18.922Z"
-  },
-  {
-    "businessId": "7d464e27-f608-458c-a697-e777df852330",
-    "name": "Other Owner",
-    "email": "other@test.local",
-    "passwordHash": "demo",
-    "role": "owner",
-    "id": "b428aebe-9e29-4bbd-a65c-e09a8902c741",
-    "createdAt": "2026-05-16T07:06:18.950Z",
-    "updatedAt": "2026-05-16T07:06:18.950Z"
+    "id": "fa740527-82d0-4ffd-b743-0987a717cf02",
+    "businessId": "c83d9792-dfb1-472f-8348-408c7f602613",
+    "name": "Admin",
+    "email": "admin@local",
+    "passwordHash": "",
+    "role": "admin",
+    "createdAt": "2026-05-17T07:17:10.840Z",
+    "updatedAt": "2026-05-17T07:17:10.840Z"
   }
 ]

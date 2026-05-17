@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "businessId": "c83d9792-dfb1-472f-8348-408c7f602613",
+    "rating": 4,
+    "transcript": "Great service!",
+    "sentiment": "positive",
+    "id": "5b46b75a-5f09-4510-b311-f305671e4fb5",
+    "createdAt": "2026-05-17T07:17:13.637Z",
+    "updatedAt": "2026-05-17T07:17:13.637Z"
+  }
+]
